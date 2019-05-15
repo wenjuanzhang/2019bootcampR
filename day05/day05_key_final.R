@@ -37,6 +37,7 @@ tibble(number = A, bool = B, sex = C, letters = D)
 # Factors are really just strings with a defined set of possible values
 sexfac <- factor(C)
 sexfac <- factor(C, levels = c("F", "M", "O", "Prefer not to say"))
+sexfac
 class(sexfac)
 levels(sexfac)
 tibble(number = A, bool = B, `User sex` = sexfac)
@@ -47,8 +48,9 @@ tibble(number = A, bool = B, `User sex` = sexfac)
 # them back to factors...
 
 # You can also coerce regular data frames into tibbles
+mtcars
 as_tibble(mtcars)
-
+rownames(as_tibble(mtcars))
 # Now for data cleaning with R - today we will do a lot of this learning outside
 # of R or Rstudio
 library("tidyr")
@@ -61,23 +63,40 @@ browseURL("https://cran.r-project.org/web/packages/tidyr/vignettes/tidy-data.htm
 browseURL("http://r4ds.had.co.nz/tidy-data.html")
 
 ?table4a
+table4a
 test1 <- as_tibble(cbind(table4a, test = c(1, 2, 3)))
+?gather
 gather(table4a, 2:3, key = "year", value = "cases")
 
 gather(test1, 2:3, key = "year", value = "cases")
+gather(test1, c(`1999`,`2000`), key = "year", value = "cases")
+gather(test1, `1999`:`2000`, key = "year", value = "cases")
+
+test2 <- table2 
+# if a typo happen
+test2[3, 'country'] <- 'AfghAnisan' 
+test2[3, 'type'] <- 'cses' 
+spread(test2, key = type, value = count)
+# fix the typo
+test2[3, 'country'] <- 'AfghAnistan' 
+spread(test2, key = type, value = count)
 
 View(table2)
-
+?spread
 spread(table2, key = type, value = count)
 
 table3
 
+# column name `rate` is equivalent to the number of columns
 separate(table3, `rate`, into = c("cases", "population"), sep = "/")
+separate(table3, 3, into = c("cases", "population"), sep = "/")
 
 table5
 
 table5a <- unite(table5, new, 2:3, sep = "")
 table5a$new <- as.integer(table5a$new)
+table5a <- unite(table5, `year`, 2:3, sep = "")
+table5a$year <- as.integer(table5a$year)
 
 ### LEARNING FROM TEH INTERWEBZ TODAY ###
 
@@ -99,10 +118,11 @@ View(who)
 who1 <- gather(who, key = "code", value = "value", 5:60)
 
 
-
+# default separation on "_"??
 who1 <- separate(who1, code, c("new", "var", "sexage"))
 
 
-
+?separate
+# can tell separate to separate after the first character
 who1 <- separate(who1, sexage, c("sex", "age"), sep = 1)
 who1 <- spread(who1, var, value)
