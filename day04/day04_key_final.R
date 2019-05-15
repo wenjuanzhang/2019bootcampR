@@ -887,3 +887,34 @@ griddata[16,7:10]
 griddata2[16,7:10]
 
 # Ex. 12 Highly divisible 
+findnum_divisor <- function(num){
+  num_divisor <- 0
+  divisor_list <- list()
+  for (i in 1:as.integer(num/2)){
+    if(num %% i ==0){
+      divisor_list <- c(divisor_list,i)
+      num_divisor <- num_divisor + 1
+    }
+  }
+  divisor_list <- c(divisor_list,num)
+  c(divisor_list,num_divisor+1)
+  num_divisor+1
+}
+findnum_divisor(1222)
+findnum_divisor(sum(1:7))
+triangularnum_withndivisors <- function(n){
+  num_divisor <- 1
+  i <- 2
+  while(num_divisor < n){
+    triangular_num <- sum(1:i)
+    #print(triangular_num)
+    num_divisor <- findnum_divisor(triangular_num)
+    if(num_divisor >= n){
+      target_num <- c(triangular_num,i)
+      break
+    }
+    i <- i+1
+  }
+  target_num
+}
+triangularnum_withndivisors(500)
