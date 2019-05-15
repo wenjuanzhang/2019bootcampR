@@ -59,9 +59,13 @@ easypack <- function(package) {
 # already loaded from when we called library() on the entire tidyverse. Doing 
 # this (importing just a single package) can save time and space if you know 
 # you'll just need a specific function.
+<<<<<<< HEAD
 easypack("readr")
 library("readr")
+=======
+library("readr")
 
+>>>>>>> master
 # The simplest way to read a flat file into R is to just read the whole file 
 # into one long string. Sometimes this is a great idea- for instance, maybe you
 # want to import a long text file for natural language processing or genomics.  
@@ -82,7 +86,10 @@ read_file("data/prideandprejudice.txt")
 
 # But what if we want to read in the text file one line at a time? For this, 
 # using base R, we can use readLines
+<<<<<<< HEAD
 # but not able to sense some of the unicodes
+=======
+>>>>>>> master
 readLines("data/prideandprejudice.txt")
 
 # That went a lot smoother than readChar() did, but one glaring issue is the
@@ -230,8 +237,13 @@ read.xlsx("data/crimebyyear_multisheet.xlsx", 1)
 # readxl. This package does not load automatically with the rest of the 
 # tidyverse packages since it isn't used quite as often- this means you'll have
 # to load it separately.
+<<<<<<< HEAD
 easypack("readxl")
 library("readxl")
+=======
+library("readxl")
+
+>>>>>>> master
 # The core function used for importing both .xls and .xlsx files is read_excel()
 read_excel("data/fbicrime.xls")
 
@@ -266,6 +278,7 @@ library(haven)
 # The haven function for importing SAS files is, aptly named, read_sas()
 read_sas("data/gats_india.sas7bdat")
 
+<<<<<<< HEAD
 #-----------#
 # Databases #
 #-----------#
@@ -350,6 +363,8 @@ dbWriteTable(conn = con, name = 'mtcars', value = mtcars)
 # joining related tables, but this all requires more knowledge of SQL. Since
 # this is an R course, not a SQL one, we'll keep the discussion fairly basic.
 
+=======
+>>>>>>> master
 #-------------------#
 # Data from the Web #
 #-------------------#
@@ -364,8 +379,13 @@ dbWriteTable(conn = con, name = 'mtcars', value = mtcars)
 # and versatile is called jsonlite. Although this package isn't officially part
 # of the tidyverse, it is referred to as "tidyverse-adjacent" because many of 
 # its functions and formats play nicely with the tidyverse.
+<<<<<<< HEAD
 easypack("jsonlite")
 library("jsonlite")
+=======
+library("jsonlite")
+
+>>>>>>> master
 # Some web APIs are completely free and publicly accessible. My favorite among 
 # these is the GitHub API, which posts JSON versions of all publicly accessible
 # repositories at https://api.github.com/repos - to read more about the GitHub 
