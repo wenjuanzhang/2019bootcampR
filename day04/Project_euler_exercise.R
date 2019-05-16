@@ -918,4 +918,4 @@ triangularnum_withndivisors <- function(n){
   }
   target_num
 }
-triangularnum_withndivisors(400)
+triangularnum_withndivisors(500)
