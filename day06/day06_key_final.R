@@ -15,10 +15,16 @@
 
 # First, we will of course load the tidyverse package dplyr, as well as install
 # and load the example data, which comes in a separate package, nycflights13
+
+# clear all variables functions definition
+rm(list = ls(all.name = TRUE))
+browseURL("http://r4ds.had.co.nz/transform.html")
+
 library(dplyr)
 install.packages("nycflights13")
 library(nycflights13)
 
+# show data in a pop-out spread sheet format
 View(flights)
 
 #--------#
@@ -26,6 +32,7 @@ View(flights)
 #--------#
 
 # Filtering can be done with base R, but it is pretty verbose...
+# , indicate want everything
 flights[(flights$month == 1 & flights$day == 1), ]
 
 # Instead, you can do this in the tidyverse with the dataset as the first 
@@ -37,10 +44,12 @@ filter(flights, month == 1, day == 1)
 # just include the |
 filter(flights, month == 11 | month == 12)
 filter(flights, month %in% c(11, 12))
+# %...% tells R that ... is operator
+filter(flights, !month %in% c(11, 12))
 
 ### TRY 5.2.4 EXERCISE 1.4 ###
-
-
+filter(flights, month %in% c(7,8,9))
+filter(flights, month == 7 | month == 8 | month == 9)
 
 filter(flights, month %in% 7:9)
 
@@ -72,10 +81,18 @@ arrange(flights, year, month, day)
 # You can reverse the order so that items are sorted from largest to smallest by
 # using the desc() function in the argument.
 arrange(flights, desc(arr_time))
+arrange(flights, desc(month), desc(day))
 
 ### TRY 5.3.1 EXERCISE 2 ###
-
-
+# most delayed flights
+arrange(flights, desc(dep_delay)) 
+# exact delayed time
+arrange(flights, desc(dep_delay))$dep_delay[1]
+# flights that leave earliest
+arrange(flights, dep_delay)
+arrange(flights, dep_delay)$dep_delay[1]
+# find the smallest positive delay
+arrange(filter(flights, dep_delay >=0 ), dep_delay)$dep_delay[1]
 
 arrange(flights, desc(dep_delay))
 
@@ -94,13 +111,20 @@ flights[c("year", "month", "day")]
 select(flights, year, month, day)
 select(flights, year:day)
 flights["year":"day"]
+# remove some columns
 select(flights, -(year:day))
 
 # You can also use special search functions to find all variables that match a 
 # given condition
+
+# comparison with SQL:
+# start_with ==> LIKE "blah%"
+# ends_with ==> LIKE "%blah"
+# contains ==> LIKE "%blah%"
 select(flights, starts_with("arr_"))
 select(flights, ends_with("delay"))
 select(flights, contains("time"))
+flights
 
 # If you want to rename a coulmn in base R, you have to list every other column
 cbind(flights[1:11], tail_num = flights$tailnum, flights[13:19])
@@ -112,10 +136,23 @@ rename(flights, tail_num = tailnum)
 # when using base R subsetting
 flights[c(19, 15, 1:14, 16:18)]
 
+flights_test =flights
+flights_test[1,'year']=2014
+
 # But not with dplyr, just use the everything() function
 select(flights, time_hour, air_time, everything())
 
 ### TRY 5.4.1 EXERCISE 1 ###
+select(flights, starts_with("dep"), starts_with("arr"))
+select(flights, 4,6,7,9)
+
+
+
+
+
+
+
+
 
 
 select(flights, 4, 6, 7, 9)
@@ -162,6 +199,7 @@ mutate(flights,
 mutate(flights,
        gain = arr_delay - dep_delay,
        hours = air_time / 60,
+       #hours = air_time %/% 60,
        gain_per_hour = gain / hours
 )
 
@@ -174,6 +212,27 @@ transmute(flights,
 )
 
 ### TRY 5.5.2 EXERCISE 1 ###
+
+flights$dep_time[1] %/% 100 *60 + flights$dep_time[1] %% 100
+
+transmute(flights, dep_time_in_mins = dep_time %/% 100 *60 + dep_time %% 100,
+          sched_dep_time_in_mins = sched_dep_time %/% 100 *60 + sched_dep_time %% 100)
+
+
+
+
+
+
+
+transmute(flights,
+          dep_time,
+       dep_time_mins = dep_time %/% 100 * 60 + dep_time %% 100,
+       sched_dep_time,
+       sched_dep_time_mins = 
+         sched_dep_time %/% 100 * 60 + sched_dep_time %% 100) 
+#%>%
+#  select(dep_time, dep_time_mins, sched_dep_time, sched_dep_time_mins)
+
 
 
 
@@ -194,6 +253,7 @@ no_pipe_popular_dests <- filter(dest_groups, n() > 365)
 # Hard to read!
 one_liner_popular_dests <- filter(group_by(flights, dest), n() > 365)
 
+?group_by
 # Break up each dplyr "verb" so that each is on it's own line
 popular_dests <- flights %>% 
   group_by(dest) %>% 
