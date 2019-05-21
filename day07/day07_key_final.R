@@ -114,7 +114,7 @@ flights %>%
 # (http://www.cookbook-r.com/Graphs/) - We'll work through some of these 
 # examples in class today
 library(ggplot2)
-
+?diamonds
 diamonds %>%
   ggplot(aes(x = carat)) +
   geom_histogram()
@@ -126,15 +126,54 @@ diamonds %>%
 
 diamonds %>%
   filter(price < 11000) %>%
+  ggplot(aes(x = cut, y = price, fill=0)) +
+  geom_violin()
+
+diamonds %>%
+  filter(price < 11000) %>%
+  ggplot(aes(x = cut, y = price, fill=cut)) +
+  geom_violin()
+
+diamonds %>%
+  filter(price < 11000) %>%
+  ggplot(aes(x = cut, y = price)) +
+  #geom_boxplot()
+  geom_violin(aes(fill = cut))
+
+?ggplot
+
+hist(diamonds$carat)
+
+# flip the coordinates
+# '+' sign is like pipe as '%>%' in dplyr
+diamonds%>%
+  filter(price < 11000) %>%
   ggplot(aes(x = cut, y = price)) +
   geom_boxplot() +
   coord_flip()
 
+diamonds %>%
+  filter(price < 11000) %>%
+  ggplot(aes(x = cut, y = price)) +
+  geom_boxplot(aes(fill=cut)) +
+  coord_flip()
+
+# stats = "identity": use the data given, don't calculate mean or std
+# position_dodge()??
 CO2 %>%
   filter(conc == 1000) %>%
   group_by(Treatment, Type) %>%
   summarize(mean = mean(uptake), sd = sd(uptake)) %>%
   ggplot(mapping = aes(x = Treatment, y = mean, fill = Type)) +
+  geom_bar(stat = "identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge())
+
+# mapping is the name of the argument, you don't need to give the name of argument
+CO2 %>%
+  filter(conc == 1000) %>%
+  group_by(Treatment, Type) %>%
+  summarize(mean = mean(uptake), sd = sd(uptake)) %>%
+  ggplot(aes(x = Treatment, y = mean, fill = Type)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), position = position_dodge())
 
@@ -153,8 +192,17 @@ CO2 %>%
 
 
 diamonds %>%
-  ggplot(aes(x = carat, y = price), size = .1, , color = "blue") +
+  ggplot(aes(x = carat, y = price), size = .1, color = "blue") +
   geom_point()
+
+diamonds %>%
+  ggplot(aes(x = carat, y = price), size = .1, color = "darkblue") +
+  geom_point()
+
+diamonds %>%
+  ggplot(aes(x = carat, y = price)) +
+  geom_point(size = .1, color = "darkblue")
+
 
 ### EXERCISE 3.2.4 #4 ###
 
