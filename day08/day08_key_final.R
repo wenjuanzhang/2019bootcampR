@@ -12,11 +12,38 @@
 # Chi-square Test #
 #-----------------#
 
+# Statistics 101
+
+# P value: how likely something occur by chance
+# Null hypothesis: opposite of what you try to show
+
+# Null hypothesis H_/phi: There is no relationship between your variables
+# Alternative hypothesis H_A: There is a relationship between your variables
+# you can have more than one, or more specific alternative hypothesis
+# eg1: H_A+: A is greater than B (call one tailed test)
+# eg2: H_A-: A is less than B
+# why should you accept the Null or alternative hypothesis: --> P value
+# P-value: probability that the Null hypothesis is correct.
+# P <= 0.05: 5% possibility that your null hypothesis is correct, "significant"
+
+#       H     T 
+# Obs  31     29
+# Exp  30     30
+
+# Null Hypothesis: coin is fair
+# alternative hypothesis: coin is not fair
+
+# the following concatenation is equal to groupby + summarize
+# outcome: H T T H T T H T H H H H T ...
+# groupby outcome by 'T' 'H' and then summarize 
+# default: the occurance of each outcome is equal
+
 observed_coin1 <- c("heads" = 31, "tails" = 29)
 
 chisq.test(observed_coin1)
 
-
+# X-squared = ..., df = 1 ("df"="degree of freedome"), p-value =0.7963 much bigger than 0.05
+# should accept Null hypothesis: fair coin
 
 observed_coin2 <- c("heads" = 20, "tails" = 40)
 
@@ -56,7 +83,7 @@ total_sig / 200
 observed_dice <- c("one" = 5, "two" = 5, "three" = 5, 
                    "four" = 5, "five" = 5, "six" = 35)
 
-
+chisq.test(observed_dice)
 
 dice_result <- chisq.test(observed_dice)
 dice_result$observed
@@ -67,8 +94,15 @@ dice_result$expected
 # Do you have an equal number of manual and automatic transmissions in mtcars?
 # How about an equal number of each type of cylinder?
 
+observed_num_transmissions <- c("manual" = sum(mtcars$am), "automatic" = length(mtcars$am)-sum(mtcars$am))
+chisq.test(observed_num_transmissions)
 
-
+mtcars %>%
+  select(cyl) %>%
+  group_by(cyl) %>%
+  summarize(n=n()) %>%
+  select(n) %>%
+  chisq.test()
 
 res <- mtcars %>%
   select(am) %>%
@@ -76,6 +110,24 @@ res <- mtcars %>%
   summarize(n = n()) %>%
   select(n) %>%
   chisq.test()
+
+res <- mtcars %>%
+  select(am) %>%
+  group_by(am) %>%
+  summarize(n = n()) %>%
+  select(n) %>%
+  chisq.test(p=c(.8,.2))
+
+res
+
+res <- mtcars %>%
+  select(am) %>%
+  group_by(am) %>%
+  summarize(n = n()) %>%
+  select(n) 
+
+c(19,13)%>%
+  chisq.test(p=c(.9,.1))
 
 res$expected
 
@@ -95,6 +147,17 @@ mtcars %>%
 
 ### One sample: compare a distribution to an expected mean ###
 
+#   Round    Type    # H/30
+#     1      Fair      15
+#     1      UnF       28
+#     2      Fair      14
+#     2      UnF       25
+
+# Null hypothesis: they are same, 
+# F (expected distribution, standard normalize distribution) and 
+# UnF (distribution to be tested) have two different distributions
+# overlapping of two distributions below 0.05 of the total area of the curve
+
 set.seed(42)
 rnorm(200) %>%
   t.test(mu = 0)
@@ -104,7 +167,7 @@ rnorm(200) %>%
 # The morley dataset records many replicates of the measure of the speed of 
 # light (all values are in km/sec minus 299000)- check to see if the mean is 
 # different from 850
-
+# p-value > 0.05 fali to reject the null hypothesis
 
 
 t.test(morley$Speed, mu = 850)
@@ -121,11 +184,18 @@ t.test(morley$Speed + 299000, mu = 299850)
 four <- mpg$hwy[mpg$cyl == 4]
 eight <- mpg$hwy[mpg$cyl == 8]
 
+# t-test can not do well with two samples with quite different data sizes
+
+# "student test", "welch 2-sample test"
+
 t.test(four, eight)
 
 t.test(four, eight, alternative = "greater")
 
 t.test(four, eight, alternative = "less")
+
+# since we can only sample a limited number of each type data
+# power analysis to make sure enough sample of each group data makes you t-test robust
 
 mpg %>%
   filter(cyl %in% c(4, 8)) %>%
@@ -136,6 +206,8 @@ mpg %>%
   ggplot(aes(hwy, colour = factor(cyl))) +
   geom_density()
 
+# 2 tail test(5%), 1 tail test (2.5%)
+
 ### EXERCISE ###
 
 # Compare petal length in the iris dataset between Species setosa and virginica
@@ -145,6 +217,7 @@ hist(iris$Petal.Length[iris$Species == "virginica"])
 iris %>%
   filter(Species %in% c("setosa", "virginica")) %>%
   t.test(Petal.Length ~ Species, .)
+
 
 
 
@@ -162,6 +235,9 @@ sleep %>%
   arrange(group, ID) %>%
   t.test(extra ~ group, ., paired = TRUE)
 
+# if you want to pipe some thing as a second or third argument other than the first,
+# you can use "."
+
 # Basis for plot taken from a StackOverflow answer: https://stackoverflow.com/questions/31102162/r-paired-dot-plot-and-box-plot-on-same-graph-is-there-a-template-in-ggplot2
 sleep %>%
   arrange(group, ID) %>%
@@ -172,6 +248,8 @@ sleep %>%
   labs(x = "Drug Group", y = "Additional Hours of Sleep", 
        title = "Paired t-test comparing effects of two drugs on sleep time") +
   theme_classic()
+
+# paired t-test is actually one sample test: 
 
 ### EXERCISE ###
 
@@ -195,6 +273,7 @@ result_anova <- mpg %>%
   aov(hwy ~ factor(cyl), .)
 
 summary(result_anova)
+
 
 mpg %>%
   filter(cyl != 5) %>%
