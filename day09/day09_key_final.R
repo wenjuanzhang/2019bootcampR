@@ -16,15 +16,18 @@ datasets::freeny
 # Correlations #
 #--------------#
 
+library(ggplot2)
 # Before we get to Regressions and explanations for relationships between 
 # variables, we first need to know where to look. This is best done with a 
 # correlation test, to see whether a variable or set of variables are associated
 # with another, statistically.  This is calculated with the cor() function in 
 # base R, which can be used on a single X & Y variable or many:
 cor(freeny$y, freeny$lag.quarterly.revenue)
+?ggplot(freeny)+
+  geom_point(aes(x=freeny$y, y=freeny$lag.quarterly.revenue))
 .997795 ^ 2
 summary(lm(y ~ lag.quarterly.revenue, freeny))
-
+model <- 
 # for all variables in the dataset
 cor(freeny)
 
@@ -32,17 +35,23 @@ cor(freeny)
 
 # Which variables are correlated in the mtcars dataset? What are the strongest
 # and the weakest relationships?
+max(cor(mtcars)!=1.)
+
+
+
+
 
 
 
 which(cor(mtcars) == max(cor(mtcars)[which(cor(mtcars) != 1)]))
+which(cor(mtcars) == min(abs(cor(mtcars))[which(cor(mtcars) != 1)]))
 colnames(cor(mtcars))[14 %/% 11]; colnames(cor(mtcars))[14 %/% 11 + 1]
 
 
 which(cor(mtcars) == min(cor(mtcars)[which(cor(mtcars) > 0)]))
 cor(mtcars)[6]
 colnames(cor(mtcars))[99 %% 11+11]; colnames(cor(mtcars))[99 %/% 11 + 1]
-
+cor(mtcars)[99]
 #------------#
 # Regression #
 #------------#
@@ -75,11 +84,83 @@ ggplot(freeny, aes(x = lag.quarterly.revenue, y = y)) +
   scale_x_continuous(aes(xmin = 0,xmax = 10)) +
   scale_y_continuous(aes(ymin = 0, ymax = 10)) 
 
+ggplot(freeny, aes(x = lag.quarterly.revenue, y = y)) + 
+  geom_point() +
+  geom_smooth(method = lm) +
+  scale_x_continuous(aes(xmin = 0,xmax = 10)) +
+  scale_y_continuous(aes(ymin = 0, ymax = 10)) 
+
 ### EXERCISE ###
 
 # What are the slope and intercept of the relationship between mpg and disp in
 # the dataset mtcars?
 
+X <- mtcars$mpg
+Y <- mtcars$disp
+
+b <- sum((X - mean(X)) * (Y - mean(Y))) / sum((X-mean(X)) ^ 2)
+a <- mean(Y) - b * mean(X)
+
+lmod1 <- lm(mpg ~ disp, mtcars)
+
+lmod1$coefficients[1]; a
+lmod1$coefficients[2]; b
+
+library(ggplot2)
+ggplot(mtcars, aes(x = mpg, y = disp)) + 
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE) +
+  scale_x_continuous(aes(xmin = 0,xmax = 10)) +
+  scale_y_continuous(aes(ymin = 0, ymax = 10)) 
+
+ggplot(mtcars, aes(x = mpg, y = disp)) + 
+  geom_point() +
+  geom_smooth(method = lm) +
+  scale_x_continuous(aes(xmin = 0,xmax = 10)) +
+  scale_y_continuous(aes(ymin = 0, ymax = 10))
+
+library('dplyr')
+
+mtcars %>%
+  lm(mpg ~ disp, .)
+
+mtcars2 %>%
+  filter(!is.na(disp)) %>%
+  lm(mpg ~ disp, .)
+
+mtcars2 <- mtcars
+mtcars2$disp[5] =NA
+
+lm(mtcars$mpg ~ mtcars$disp)
+lm(mtcars2$mpg ~ mtcars2$disp)
+summary(lm(mtcars2$mpg ~ mtcars2$disp))
+
+# R-squared value higher than 0.5 is good? aim to shoot for high R-squared value
+# high value in R-squared is tighter to the line, low value corresponds to more spread 
+# out from the line
+
+# p-value obtained from summary is the p-value for the entire model
+
+# residues: residue variation left after a line is added
+# anova is doing t-test on more than 2 distributions, in order to get a P value,
+# need to use summary function
+
+
+# Hypotheses for intercept
+# H_A: intercept != 0
+# H_null: intercept = 0
+
+# Hypotheses for slope
+# H_A: slope != 0, when there is some relationship between two variables,
+# when one observable increases, the other observable tends to increase or decrease
+# H_null: slope = 0
+
+# how to get the p-value:
+# consider the variations of the intercept, slope distributions of best fits obtained 
+# by removing some of the points
+# compare one distribution with an expected value when doing multi-distribution test
+
+# residues: sum of distance (from the point to the line) squared
 
 
 lm(mpg ~ disp, mtcars)
@@ -87,6 +168,13 @@ lm(mpg ~ disp, mtcars)
 #------------------------#
 # Regression Assumptions #
 #------------------------#
+
+# (bad ways) how to make result significant: generating new points using old data points, 
+# since the std is the square sum divided by the sample size, more samples, 
+# the smaller the std, the significant your result is
+
+# data transformation, 
+
 
 # 1. The average of the population errors(residuals) is 0.
 
@@ -104,6 +192,10 @@ lm(mpg ~ disp, mtcars)
 
 # The best way to check your assumptions is to plot the various checks:
 plot(lmod1)
+
+# residue plots: 
+# Q-Q plot: give how the data points fall on normal distribution
+# high cook distance: bad??
 
 # A great resource for understanding these plots can be found on the website for
 # the stats department at UVA: http://data.library.virginia.edu/diagnostic-plots
@@ -153,6 +245,8 @@ ggplot(freeny, aes(x = lag.quarterly.revenue, y = y)) +
 install.packages("broom")
 library(broom)
 tidy(lmod1)
+tidy(lmod1)[2]
+tidy(lmod1)[2,2]
 
 # The p-value, however, does not tell the whole story for a linear model, 
 # because we don't know how well the data fits the model, only that its slope
@@ -199,6 +293,19 @@ summary(lm(mpg ~ wt, mtcars))
 # Multiple Regression #
 #---------------------#
 
+## want to do anova than multiple t-tests between two of the variables
+## multiple predictive variables would favor multivariate regression than a bunch of 
+## single variate regressions
+## ### variables might have interactions
+
+## an explanatory model without interactions is better than an explanatory model
+## including every interactions
+## if you don't have a way to interpret the interactions, 
+## the possibility to find something significant by chance is pretty high
+
+## as we add more and more variables in, we should be decreasing the residues variations
+## building a predictive model
+
 # What if you want to know how multiple variables affect a single variable at 
 # once? This can be tricky, because if you just run a bunch of single-variable
 # linear models, you are not capturing the whole picture. You may have two 
@@ -213,6 +320,7 @@ summary(lm(mpg ~ wt, mtcars))
                 income.level + market.potential, freeny))
 
 # This all can be accomplished with less writing by using the dot to say "all"
+## "." means different in pipe, it refers to everything except y from the df
 (lmod3 <- lm(y ~ ., freeny))
 
 # It is only appropriate to compare different R² from different models if the
@@ -225,6 +333,11 @@ summary(lmod2)
 # Typically, the more variables you include, the tighter your relationship will 
 # be, since you capture more and more of the unexplained information with each 
 # added variable, but where do you stop? Stepwise regression can help with this:
+
+## stepwise regression: y~x1+x2+x3+x4+...
+## make models: y~ x1, y~x2, y~x3, y~x4, y~x1+x2, y~x1+x3, ...
+## tell how good a model is ...
+## want low Mallow's cp
 install.packages("olsrr")
 library(olsrr)
 ols_step_all_possible(lmod2)
