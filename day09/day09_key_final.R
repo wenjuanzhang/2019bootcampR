@@ -15,7 +15,8 @@ datasets::freeny
 #--------------#
 # Correlations #
 #--------------#
-
+install.packages("caret", dependencies = TRUE)
+library(caret)
 library(ggplot2)
 # Before we get to Regressions and explanations for relationships between 
 # variables, we first need to know where to look. This is best done with a 
