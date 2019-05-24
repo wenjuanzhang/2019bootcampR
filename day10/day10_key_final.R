@@ -160,9 +160,9 @@ sqrt(mean(error^2))
 # set creation, and we can also replicate the process through cross-validation
 # to get multiple training and test sets so as to incorporate all data into our
 # training and test sets; first, let's just do the whole dataset
-install.packages("caret", dependencies = TRUE)
+# install.packages("caret", dependencies = TRUE)
 library(caret)
-
+mpg
 # First, let's clean up our old dataset:
 mpg <- select(mpg, -model, -train)
 
@@ -171,6 +171,7 @@ mpgmod3 <- train(hwy ~ ., mpg, method = "lm")
 predictions <- predict(mpgmod3, mpg)
 error <- predictions - mpg$hwy
 sqrt(mean(error ^ 2))
+
 
 # We can define our subgrouping through something called k-fold cross-validation
 # using the trainControl() function; here we will use 5 "folds", or equally
@@ -285,6 +286,7 @@ predict(hotmod2, isdefahotdog)
 # Clustering (using kNN) #
 #------------------------#
 
+## like machine learning version of anova
 # Clustering is useful when you have a small number of variables, but many 
 # categories into which individuals may fall. For this example, I've adapted 
 # much of the code from https://rpubs.com/njvijay/16444
